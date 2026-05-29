@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CP超话小游戏</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#f5f0ff;min-height:100vh;padding:16px}
+.app{max-width:680px;margin:0 auto;padding:16px 0}
+.banner{background:linear-gradient(135deg,#f8e1f4,#e8d5f5);border-radius:16px;padding:24px;margin-bottom:16px;text-align:center;border:1px solid #e0c0f0}
+.banner h1{font-size:24px;font-weight:600;color:#6b3fa0;margin-bottom:6px}
+.banner p{font-size:14px;color:#9b59b6}
+.setup-card{background:#fff;border:1px solid #e8e0f5;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 12px rgba(107,63,160,0.06)}
+.setup-card h2{font-size:17px;font-weight:600;color:#333;margin-bottom:16px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group label{font-size:13px;color:#888}
+.form-group input,.form-group select{font-size:14px;padding:9px 12px;border:1px solid #ddd;border-radius:10px;background:#fff;color:#333;width:100%;outline:none;transition:border .2s}
+.form-group input:focus,.form-group select:focus{border-color:#9b59b6}
+.section-label-sm{font-size:12px;font-weight:600;color:#888;letter-spacing:.5px;margin-bottom:8px;text-transform:uppercase}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.tag{font-size:13px;padding:5px 12px;border-radius:20px;cursor:pointer;border:1px solid #ddd;background:#f8f8f8;color:#666;transition:all .15s;user-select:none}
+.tag.active{background:#f0e6ff;border-color:#9b59b6;color:#6b3fa0;font-weight:500}
+.generate-btn{width:100%;padding:13px;font-size:15px;font-weight:600;background:#6b3fa0;border:none;border-radius:12px;color:#fff;cursor:pointer;transition:background .15s;letter-spacing:.5px}
+.generate-btn:hover{background:#5a3490}
+.generate-btn:active{background:#4a2a80}
+.section-label{font-size:12px;font-weight:600;color:#9b59b6;letter-spacing:1px;margin-bottom:10px;padding-left:4px;border-left:3px solid #9b59b6;padding-left:8px}
+.post-card{background:#fff;border:1px solid #ede0ff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(107,63,160,0.05)}
+.post-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0}
+.av-pink{background:#fce4ec;color:#c2185b}
+.av-purple{background:#ede7f6;color:#6b3fa0}
+.av-blue{background:#e3f2fd;color:#1565c0}
+.av-green{background:#e8f5e9;color:#2e7d32}
+.av-orange{background:#fff3e0;color:#e65100}
+.post-meta{flex:1}
+.post-username{font-size:14px;font-weight:600;color:#333}
+.post-badge{font-size:11px;padding:2px 8px;border-radius:10px;margin-left:6px;font-weight:500}
+.badge-painter{background:#fce4ec;color:#c2185b}
+.badge-writer{background:#e8f5e9;color:#2e7d32}
+.badge-analyst{background:#e3f2fd;color:#1565c0}
+.badge-fan{background:#f3e5f5;color:#6b3fa0}
+.post-time{font-size:12px;color:#aaa;margin-top:2px}
+.post-content{font-size:14px;color:#333;line-height:1.8;margin-bottom:12px}
+.img-placeholder{background:#f8f4ff;border:1px dashed #c9b8ef;border-radius:12px;padding:28px;text-align:center;color:#b0a0d0;font-size:13px;margin-bottom:12px}
+.post-actions{display:flex;gap:20px;font-size:13px;color:#bbb}
+.action-btn{display:flex;align-items:center;gap:5px}
+.action-num{font-size:12px}
+.comments{border-top:1px solid #f0e8ff;margin-top:12px;padding-top:12px}
+.comment{display:flex;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #f8f5ff}
+.comment:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.comment-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0}
+.comment-body{flex:1}
+.comment-user{font-size:13px;font-weight:600;color:#444}
+.comment-text{font-size:13px;color:#666;line-height:1.6;margin-top:2px}
+.hot-tag{display:inline-block;background:#fff3e0;color:#e65100;font-size:11px;padding:1px 7px;border-radius:4px;margin-left:4px;font-weight:500}
+.divider{height:1px;background:linear-gradient(90deg,transparent,#e0d0f5,transparent);margin:20px 0}
+.cp-header{text-align:center;margin-bottom:20px;padding:16px;background:#fff;border-radius:14px;border:1px solid #ede0ff}
+.cp-name{font-size:20px;font-weight:700;color:#6b3fa0}
+.cp-sub{font-size:13px;color:#aaa;margin-top:5px}
+.loading{text-align:center;padding:50px;color:#9b59b6;font-size:15px}
+.loading-dot{animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
+b{font-weight:600}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="banner">
+    <h1>✦ CP超话小游戏 ✦</h1>
+    <p>模拟超话广场 · 生成专属CP内容</p>
+  </div>
+
+  <div class="setup-card">
+    <h2>设置你的CP</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>左位名字</label>
+        <input type="text" id="leftName" placeholder="例：顾北" maxlength="10"/>
+      </div>
+      <div class="form-group">
+        <label>右位名字</label>
+        <input type="text" id="rightName" placeholder="例：沈云" maxlength="10"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>左位星座</label>
+        <select id="leftSign">
+          <option value="">选择星座</option>
+          <option>白羊座</option><option>金牛座</option><option>双子座</option><option>巨蟹座</option>
+          <option>狮子座</option><option>处女座</option><option>天秤座</option><option>天蝎座</option>
+          <option>射手座</option><option>摩羯座</option><option>水瓶座</option><option>双鱼座</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>右位星座</label>
+        <select id="rightSign">
+          <option value="">选择星座</option>
+          <option>白羊座</option><option>金牛座</option><option>双子座</option><option>巨蟹座</option>
+          <option>狮子座</option><option>处女座</option><option>天秤座</option><option>天蝎座</option>
+          <option>射手座</option><option>摩羯座</option><option>水瓶座</option><option>双鱼座</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>左位MBTI</label>
+        <select id="leftMbti">
+          <option value="">选择MBTI</option>
+          <option>INTJ</option><option>INTP</option><option>ENTJ</option><option>ENTP</option>
+          <option>INFJ</option><option>INFP</option><option>ENFJ</option><option>ENFP</option>
+          <option>ISTJ</option><option>ISFJ</option><option>ESTJ</option><option>ESFJ</option>
+          <option>ISTP</option><option>ISFP</option><option>ESTP</option><option>ESFP</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>右位MBTI</label>
+        <select id="rightMbti">
+          <option value="">选择MBTI</option>
+          <option>INTJ</option><option>INTP</option><option>ENTJ</option><option>ENTP</option>
+          <option>INFJ</option><option>INFP</option><option>ENFJ</option><option>ENFP</option>
+          <option>ISTJ</option><option>ISFJ</option><option>ESTJ</option><option>ESFJ</option>
+          <option>ISTP</option><option>ISFP</option><option>ESTP</option><option>ESFP</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-bottom:12px">
+      <div class="section-label-sm">CP关系类型（可多选）</div>
+      <div class="tag-row" id="cpTypeTags">
+        <div class="tag active" data-val="青梅竹马">青梅竹马</div>
+        <div class="tag" data-val="欢喜冤家">欢喜冤家</div>
+        <div class="tag" data-val="上司下属">上司下属</div>
+        <div class="tag" data-val="竹马青梅">竹马青梅</div>
+        <div class="tag" data-val="宿敌相爱">宿敌相爱</div>
+        <div class="tag" data-val="互相暗恋">互相暗恋</div>
+        <div class="tag" data-val="先婚后爱">先婚后爱</div>
+        <div class="tag" data-val="网恋奔现">网恋奔现</div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:18px">
+      <div class="section-label-sm">氛围标签</div>
+      <div class="tag-row" id="vibeTags">
+        <div class="tag active" data-val="甜">甜</div>
+        <div class="tag" data-val="虐">虐</div>
+        <div class="tag" data-val="甜虐">甜虐</div>
+        <div class="tag" data-val="日常">日常</div>
+        <div class="tag" data-val="HE">HE</div>
+        <div class="tag" data-val="BE">BE</div>
+      </div>
+    </div>
+
+    <button class="generate-btn" onclick="generate()">✨ 生成超话内容</button>
+  </div>
+
+  <div id="output"></div>
+</div>
+
+<script>
+document.querySelectorAll('.tag').forEach(t=>{
+  t.addEventListener('click',function(){
+    const group=this.closest('.tag-row');
+    if(group.id==='vibeTags'){
+      group.querySelectorAll('.tag').forEach(x=>x.classList.remove('active'));
+    }
+    this.classList.toggle('active');
+  });
+});
+
+function getSelected(id){
+  return [...document.querySelectorAll('#'+id+' .tag.active')].map(t=>t.dataset.val);
+}
+
+const signTraits={
+  '白羊座':'冲动热情、行动力超强、占有欲藏得很深',
+  '金牛座':'慢热稳重、用行动表爱意、固执得让人崩溃',
+  '双子座':'话多有趣、善变得像谜、嘴硬心软的典范',
+  '巨蟹座':'情感丰富、记仇记恩、把人藏进壳里才安心',
+  '狮子座':'霸道骄傲、认定了就全力以赴、吃软不吃硬',
+  '处女座':'细腻挑剔、嘴毒心暖、偷偷照顾你的那种人',
+  '天秤座':'优柔寡断、表面云淡风轻内心风起云涌',
+  '天蝎座':'深情执着、记仇但更记恩、爱起来像深渊',
+  '射手座':'自由不羁、嘴上说随便心里全是你',
+  '摩羯座':'外冷内热、用负责任表达爱、默默守护型',
+  '水瓶座':'反骨独立、偏偏为某人收起棱角',
+  '双鱼座':'浪漫多情、感受力满分、为爱可以放弃全世界'
+};
+
+const mbtiTraits={
+  'INTJ':'战略型冷静、表面无情实则深情',
+  'INTP':'沉迷逻辑却在某人面前失效',
+  'ENTJ':'控制欲强、唯独对这个人失控',
+  'ENTP':'舌战天下却被一个眼神噤声',
+  'INFJ':'看透人心唯独看不透自己的爱',
+  'INFP':'活在幻想里却为你着陆现实',
+  'ENFJ':'付出型、把自己给光了才后悔',
+  'ENFP':'热情四射、偏偏为你收起聒噪',
+  'ISTJ':'规则至上、唯有你是例外',
+  'ISFJ':'默默守护、把爱藏进每日三餐',
+  'ESTJ':'强势主导、对你却偏偏手软',
+  'ESFJ':'爱操心的妈妈型、其实是在爱你',
+  'ISTP':'冷漠外表下藏着滚烫的心',
+  'ISFP':'用行动说爱、每个细节都是表白',
+  'ESTP':'玩世不恭直到遇见认真的理由',
+  'ESFP':'阳光本人、却只为你下雨天撑伞'
+};
+
+const compatibility={
+  good:['白羊座+射手座','白羊座+狮子座','金牛座+摩羯座','金牛座+处女座','双子座+水瓶座','双子座+天秤座','巨蟹座+双鱼座','巨蟹座+天蝎座','狮子座+射手座','处女座+金牛座','天秤座+双子座','天蝎座+巨蟹座','射手座+白羊座','摩羯座+金牛座','水瓶座+双子座','双鱼座+巨蟹座']
+};
+
+function getCompat(s1,s2){
+  if(!s1||!s2)return null;
+  const pair=s1+'+'+s2;
+  const rpair=s2+'+'+s1;
+  if(compatibility.good.includes(pair)||compatibility.good.includes(rpair))return{level:'极高',text:'天生一对！星盘显示引力惊人',color:'#e65100'};
+  const signs=['白羊座','金牛座','双子座','巨蟹座','狮子座','处女座','天秤座','天蝎座','射手座','摩羯座','水瓶座','双鱼座'];
+  const d=Math.abs(signs.indexOf(s1)-signs.indexOf(s2));
+  if(d===6)return{level:'张力满分',text:'相冲组合，越争越爱，越爱越烦',color:'#c2185b'};
+  return{level:'值得磕',text:'互补型CP，一个暖一个冷，配了！',color:'#1565c0'};
+}
+
+function getMbtiCompat(m1,m2){
+  if(!m1||!m2)return null;
+  if(m1[0]!==m2[0]&&m1[1]!==m2[1]&&m1[2]!==m2[2]&&m1[3]!==m2[3])return'完全相反！反差萌MAX，磕到头破血流的那种';
+  if(m1[1]===m2[1]&&m1[2]===m2[2])return'内核相似，会懂对方那些说不出口的话';
+  if(m1[0]!==m2[0])return'一内一外，刚好互补，内向的那个每次都被带着出门';
+  return'有共鸣有碰撞，关系复杂程度≈狗血剧情';
+}
+
+function randomFrom(arr){return arr[Math.floor(Math.random()*arr.length)]}
+
+function genFanArt(left,right,ls,rs,lm,rm,types,vibe){
+  const cpName=left+right;
+  const styleList=['清水彩风','厚涂写实','线稿黑白','赛博朋克','古风工笔','像素风','油画质感'];
+  const style=randomFrom(styleList);
+  const scenelist=[
+    left+'低头整理文件，'+right+'站在窗边看他，阳光把影子拉得很长',
+    '下雨天'+right+'把伞递给'+left+'，自己被淋到肩膀，还说没事',
+    left+'睡着了，'+right+'帮他盖上外套，手在空中停留了很久',
+    '两个人背靠背坐着，各自望向不同方向，但肩膀贴在一起',
+    left+'举高手让'+right+'够东西，'+right+'踮脚，差一点，再差一点',
+    '便利店的灯光下，'+left+'和'+right+'一人啃着一根雪糕，沉默但舒适',
+  ];
+  const scene=randomFrom(scenelist);
+  const cmt=getCompat(ls,rs);
+
+  const comments=[
+    {u:'织梦·绘梦人',av:'绘',avc:'av-pink',badge:'painter',txt:'这张用了四十层图层，光影参考了卢浮宫那幅画，大家轻虐就好嘤嘤嘤'},
+    {u:'深夜肝图中',av:'深',avc:'av-purple',badge:'painter',txt:'为了这对的眼神交流我重画了十七遍，眼睛是灵魂所在，不达标就不发出来'},
+    {u:'CP超话第一目击者',av:'目',avc:'av-blue',badge:'fan',txt:'啊啊啊啊啊救命这张把我整个人送走了'},
+    {u:'理科生磕糖',av:'理',avc:'av-green',badge:'fan',txt:'经过精密测算，这张图的糖分浓度已超过安全剂量，建议备好急救包再看'},
+    {u:'颜色控发疯中',av:'颜',avc:'av-orange',badge:'fan',txt:style+'！！！我最爱的风格！！！画师你是懂我的！！'},
+    {u:'佛系磕糖人',av:'佛',avc:'av-pink',badge:'fan',txt:'放饭了放饭了，'+cpName+'又双叒叕来投喂我了'},
+    {u:'蚌埠住了观察员',av:'蚌',avc:'av-purple',badge:'fan',txt:right+'那个表情，就是"我假装没看见但实际上我看见了"对吗对吗'},
+    {u:'截图杀手',av:'截',avc:'av-blue',badge:'fan',txt:'我已经截图十七张了，手机要爆了，值得的'},
+    {u:'抽象训练有素',av:'抽',avc:'av-orange',badge:'fan',txt:'画师yyds！'+cpName+'yyds！地球yyds！'},
+    {u:'凌晨三点在磕',av:'凌',avc:'av-green',badge:'fan',txt:'我要去买画板了，我也要给他们画图，本命绕不开必须亲自上'},
+  ];
+  const picked=[...comments].sort(()=>Math.random()-.5).slice(0,5);
+
+  return '<div class="post-card">'+
+    '<div class="post-header">'+
+      '<div class="avatar av-pink">绘</div>'+
+      '<div class="post-meta">'+
+        '<div><span class="post-username">织梦·绘梦人</span><span class="post-badge badge-painter">画手</span></div>'+
+        '<div class="post-time">刚刚 · 超话</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="post-content">【'+cpName+'·同人图】'+style+'｜'+vibe+'系<br><br>'+
+    '"'+scene+'"<br><br>'+
+    '画了三天了终于画完，'+(ls||'')+(lm?'·'+lm:'')+'×'+(rs||'')+(rm?'·'+rm:'')+'的配置真的是绝，脑子里有画面就停不下来。'+
+    (cmt?'<br><br>🔮 '+(ls||'')+'+'+(rs||'')+'契合度：<span style="color:'+cmt.color+';font-weight:600">'+cmt.level+'</span>——'+cmt.text:'')+
+    '<br><br>#'+cpName+'超话# #'+left+'x'+right+'# #同人图#</div>'+
+    '<div class="img-placeholder">🎨 同人图占位<br><span style="font-size:12px">'+style+' · '+scene.slice(0,20)+'…</span></div>'+
+    '<div class="post-actions">'+
+      '<span class="action-btn">❤️ <span class="action-num">'+Math.floor(Math.random()*5000+800)+'</span></span>'+
+      '<span class="action-btn">🔁 <span class="action-num">'+Math.floor(Math.random()*2000+300)+'</span></span>'+
+      '<span class="action-btn">💬 <span class="action-num">'+picked.length+'</span></span>'+
+    '</div>'+
+    '<div class="comments">'+
+      picked.map(function(c){
+        return '<div class="comment">'+
+          '<div class="comment-av av-'+c.avc.split('-')[1]+'">'+c.av+'</div>'+
+          '<div class="comment-body">'+
+            '<div class="comment-user">'+c.u+'<span class="post-badge badge-'+c.badge+'" style="font-size:10px">'+(c.badge==='painter'?'画手':'粉丝')+'</span></div>'+
+            '<div class="comment-text">'+c.txt+'</div>'+
+          '</div>'+
+        '</div>';
+      }).join('')+
+    '</div></div>';
+}
+
+function genFanFic(left,right,ls,rs,lm,rm,types,vibe){
+  const cpName=left+right;
+  const lt=lm?mbtiTraits[lm]:'行事独特';
+  const rt=rm?mbtiTraits[rm]:'温柔缱绻';
+  const lst=ls?signTraits[ls]:'情感细腻';
+  const rst=rs?signTraits[rs]:'深情内敛';
+
+  const openings=[
+    left+'第一次意识到不对劲，是在那个下着小雨的周三下午。',
+    '"你怎么每次都……"'+right+'的话没说完，'+left+'已经看过来了。',
+    '据说相爱的两个人，会在某一刻同时察觉到彼此的心跳。',
+    left+'不是没谈过恋爱，但没有一次，心跳快成这样过。',
+  ];
+
+  const middles=[
+    (ls?'身为'+ls+'的'+left+'，'+lst+'，偏偏在'+right+'面前把这些全数丢光。':left+'一向冷静，偏偏在'+right+'面前全数失灵。')+(rs?'而'+rs+'的'+right+'，'+rst+'，却对'+left+'毫无招架之力。':right+'明明见过大风大浪，却对'+left+'毫无招架之力。'),
+    (lm?lm+'的'+left+'从不相信直觉，但直觉在那一刻告诉他，这件事不对劲。':left+'从不相信感觉，但那一刻他感觉到了什么。')+(rm?rm+'的'+right+'则早早知道了答案，只是等'+left+'自己绕明白。':right+'早就知道了，只是在等'+left+'自己想通。'),
+  ];
+
+  const endings=[
+    '后来'+right+'问他："那天你有没有想到我？"'+left+'沉默了半秒，说："一直在想。"',
+    left+'伸出手，'+right+'没有让他等太久。',
+    '他们谁都没有先说"我喜欢你"，但谁都听懂了。',
+    '这件事的结局，只有他们两个人知道。',
+  ];
+
+  const comments=[
+    {u:'深夜码字机',av:'码',avc:'av-green',badge:'writer',txt:'连更三天了，眼睛要瞎了，但'+cpName+'给我续命，继续肝！'},
+    {u:'文笔鉴赏家',av:'鉴',avc:'av-blue',badge:'fan',txt:'最后一句话！！！我的心！！！停了三秒又跳起来！！！'},
+    {u:'深夜哭湿枕头',av:'哭',avc:'av-pink',badge:'fan',txt:'不行我要去买纸巾，请问附近便利店还开着吗'},
+    {u:'逐字稿爱好者',av:'逐',avc:'av-purple',badge:'fan',txt:'"一直在想"——轻描淡写，杀伤力最大，这就是克制的浪漫，我记一辈子'},
+    {u:'星座配对狂热粉',av:'星',avc:'av-orange',badge:'fan',txt:(ls||'')+'配'+(rs||'')+'就是这种感觉！星座真的有东西！'},
+    {u:'MBTI玄学信徒',av:'M',avc:'av-green',badge:'fan',txt:(lm||'?')+'遇到'+(rm||'?')+'，注定是一场漫长的拉锯战，作者好懂！'},
+    {u:'我磕的CP没有输',av:'磕',avc:'av-blue',badge:'fan',txt:'磕了这么多年，'+cpName+'把我磕得最狠，没有之一'},
+    {u:'凌晨发癫专业户',av:'癫',avc:'av-pink',badge:'fan',txt:'我应该睡觉的但我停不下来！！救！'},
+    {u:'文抄公举报热线',av:'举',avc:'av-purple',badge:'fan',txt:'请问这篇文的情绪浓度是否超标，我已经无法思考了'},
+  ];
+  const picked=[...comments].sort(()=>Math.random()-.5).slice(0,5);
+
+  return '<div class="post-card">'+
+    '<div class="post-header">'+
+      '<div class="avatar av-green">文</div>'+
+      '<div class="post-meta">'+
+        '<div><span class="post-username">深夜码字机</span><span class="post-badge badge-writer">写手</span></div>'+
+        '<div class="post-time">23分钟前 · 超话</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="post-content">【'+cpName+'·同人文】《'+vibe+'系短篇》约1.2k字<br><br>'+
+    randomFrom(openings)+'<br><br>'+
+    randomFrom(middles)+'<br><br>'+
+    randomFrom(endings)+'<br><br>'+
+    '<span style="font-size:12px;color:#aaa">全文已在评论区↓｜ #'+cpName+'超话# #同人文# #'+(types[0]||'')+'#</span></div>'+
+    '<div class="post-actions">'+
+      '<span class="action-btn">❤️ <span class="action-num">'+Math.floor(Math.random()*8000+1000)+'</span></span>'+
+      '<span class="action-btn">🔁 <span class="action-num">'+Math.floor(Math.random()*3000+500)+'</span></span>'+
+      '<span class="action-btn">💬 <span class="action-num">'+picked.length+'</span></span>'+
+    '</div>'+
+    '<div class="comments">'+
+      picked.map(function(c){
+        return '<div class="comment">'+
+          '<div class="comment-av av-'+c.avc.split('-')[1]+'">'+c.av+'</div>'+
+          '<div class="comment-body">'+
+            '<div class="comment-user">'+c.u+'<span class="post-badge badge-'+c.badge+'" style="font-size:10px">'+(c.badge==='writer'?'写手':'粉丝')+'</span></div>'+
+            '<div class="comment-text">'+c.txt+'</div>'+
+          '</div>'+
+        '</div>';
+      }).join('')+
+    '</div></div>';
+}
+
+function genAnalysis(left,right,ls,rs,lm,rm,types,vibe){
+  const cpName=left+right;
+  const cmt=getCompat(ls,rs);
+  const mbtiC=getMbtiCompat(lm||'',rm||'');
+
+  const sugarPoints=[
+    left+'说话从不解释，但遇到'+right+'问就答，且答得很详细',
+    '在别人面前'+right+'总是先走，偏偏等'+left+'到了才出发',
+    left+'明明可以自己解决，但会找理由找'+right+'帮忙',
+    right+'嘴上说"随你"，但'+left+'选什么都跟着',
+    '两人公开场合保持距离，私下的照片全是挨着的',
+    left+'拒绝别人从不解释，但拒绝'+right+'要附赠三行理由',
+    right+'偷偷记了'+left+'所有不经意说过的话',
+    left+'不喜欢被拍照，但'+right+'相册里全是偷拍的他',
+  ];
+  const sp=[...sugarPoints].sort(()=>Math.random()-.5).slice(0,3);
+
+  const hooks=[
+    types.includes('欢喜冤家')?'欢喜冤家最好磕的地方：恨得越用力，爱得越深。'+left+'和'+right+'每次"吵架"，都是在用另一种方式说"我在意你"。':'',
+    types.includes('青梅竹马')?'青梅竹马的精髓在于：那些年幼时的记忆，后来成了一个人逃不掉的软肋。':'',
+    types.includes('宿敌相爱')?'宿敌转恋人的爆点：从"不能接受"到"没了不行"，那个转变的瞬间，才是最可磕的。':'',
+    cmt?'星座层面：'+cmt.text:'两人星盘的相位值得深挖',
+    mbtiC?'性格层面：'+mbtiC:'',
+  ].filter(Boolean).slice(0,3);
+
+  const comments=[
+    {u:'显微镜扫描仪',av:'镜',avc:'av-purple',badge:'analyst',txt:'我用了三个小时截了四十二张图，把所有细节按时间轴排列，得出的结论是：他们其实很早就互相知道了'},
+    {u:'逻辑树爱好者',av:'逻',avc:'av-blue',badge:'analyst',txt:'楼主说的第二点，我来补充：'+left+'有一个习惯，只对'+right+'这样，这不是巧合，这是刻在骨子里的条件反射'},
+    {u:'情感心理双修',av:'理',avc:'av-green',badge:'fan',txt:'从心理学角度看，这对CP的相处模式属于"回避型遇到焦虑型"，越排斥越深陷，教科书级别'},
+    {u:'星座盘玩家',av:'星',avc:'av-orange',badge:'fan',txt:(ls||'?')+'和'+(rs||'?')+'的上升星座如果是互克的话，那就说明他们从骨子里就在互相吸引，又互相伤害'},
+    {u:'MBTI狂热分子',av:'M',avc:'av-pink',badge:'fan',txt:(lm||'?')+'和'+(rm||'?')+'！！！经典组合！！！'+(lm||'?')+'表面不在意其实全都看进去了好吗！'},
+    {u:'玄学理中客',av:'玄',avc:'av-purple',badge:'fan',txt:'说实话我不太信这些，但就这对吧，我信了，没道理就是信了'},
+    {u:'无话可说但要发言',av:'无',avc:'av-blue',badge:'fan',txt:'分析完了？好。那我可以去磕了？好。谢谢楼主，yyds'},
+    {u:'哭完继续磕',av:'哭',avc:'av-pink',badge:'fan',txt:'你不要再分析了，我的眼泪已经分析不过来了'},
+    {u:'白嫖读者实名感谢',av:'谢',avc:'av-green',badge:'fan',txt:'楼主辛苦了！！！我白嫖了这么久，今天决定打钱！！但我没有！！所以我给你发这条评论表示感谢！！'},
+  ];
+  const picked=[...comments].sort(()=>Math.random()-.5).slice(0,5);
+
+  return '<div class="post-card">'+
+    '<div class="post-header">'+
+      '<div class="avatar av-blue">析</div>'+
+      '<div class="post-meta">'+
+        '<div><span class="post-username">CP解析实验室</span><span class="post-badge badge-analyst">分析博主</span></div>'+
+        '<div class="post-time">1小时前 · 超话 <span class="hot-tag">🔥 热帖</span></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="post-content">【'+cpName+'深度分析】为什么这对CP这么好磕？<br><br>'+
+    '<b>▍糖点整理</b><br>'+
+    sp.map(function(s,i){return (i+1)+'. '+s}).join('<br>')+'<br><br>'+
+    '<b>▍好磕原因</b><br>'+
+    hooks.map(function(h,i){return (i+1)+'. '+h}).join('<br><br>')+'<br><br>'+
+    '<b>▍总结</b><br>'+
+    cpName+'这对，用一句话概括就是：<b style="color:#c2185b">明明可以直说，偏偏让对方去猜；明明猜到了，偏偏等对方先开口。</b>这就是磕点，也是虐点，更是舍不得放下的理由。<br><br>'+
+    '<span style="font-size:12px;color:#aaa">#'+cpName+'超话# #CP分析# #你们怎么这么好磕#</span></div>'+
+    '<div class="post-actions">'+
+      '<span class="action-btn">❤️ <span class="action-num">'+Math.floor(Math.random()*12000+2000)+'</span></span>'+
+      '<span class="action-btn">🔁 <span class="action-num">'+Math.floor(Math.random()*5000+800)+'</span></span>'+
+      '<span class="action-btn">💬 <span class="action-num">'+picked.length+'</span></span>'+
+    '</div>'+
+    '<div class="comments">'+
+      picked.map(function(c){
+        return '<div class="comment">'+
+          '<div class="comment-av av-'+c.avc.split('-')[1]+'">'+c.av+'</div>'+
+          '<div class="comment-body">'+
+            '<div class="comment-user">'+c.u+'<span class="post-badge badge-'+c.badge+'" style="font-size:10px">'+(c.badge==='analyst'?'分析博':'粉丝')+'</span></div>'+
+            '<div class="comment-text">'+c.txt+'</div>'+
+          '</div>'+
+        '</div>';
+      }).join('')+
+    '</div></div>';
+}
+
+function generate(){
+  const left=document.getElementById('leftName').value.trim()||'顾北';
+  const right=document.getElementById('rightName').value.trim()||'沈云';
+  const ls=document.getElementById('leftSign').value;
+  const rs=document.getElementById('rightSign').value;
+  const lm=document.getElementById('leftMbti').value;
+  const rm=document.getElementById('rightMbti').value;
+  const types=getSelected('cpTypeTags');
+  const vibes=getSelected('vibeTags');
+  const vibe=vibes.length?vibes[0]:'甜';
+  const cpName=left+right;
+
+  const out=document.getElementById('output');
+  out.innerHTML='<div class="loading">正在召唤超话广场家人们<span class="loading-dot">…</span></div>';
+
+  setTimeout(function(){
+    out.innerHTML=
+      '<div class="cp-header">'+
+        '<div class="cp-name"># '+cpName+' 超话 #</div>'+
+        '<div class="cp-sub">'+(ls||'')+(lm?'·'+lm:'')+' × '+(rs||'')+(rm?'·'+rm:'')+(types.length?' ｜'+types.join(' '):'')+' ｜ '+vibe+'</div>'+
+      '</div>'+
+      '<div class="section-label">画手产出</div>'+
+      genFanArt(left,right,ls,rs,lm,rm,types,vibe)+
+      '<div class="divider"></div>'+
+      '<div class="section-label">写手产出</div>'+
+      genFanFic(left,right,ls,rs,lm,rm,types,vibe)+
+      '<div class="divider"></div>'+
+      '<div class="section-label">分析博主产出</div>'+
+      genAnalysis(left,right,ls,rs,lm,rm,types,vibe);
+  },600);
+}
+</script>
+</body>
+</html>
